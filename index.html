@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>魚眼與相機鏡頭光學畸變綜合實驗室 (Unified Optics Lab)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b13;
+      --panel: rgba(15, 23, 42, 0.95);
+      --panel-card: rgba(2, 6, 23, 0.65);
+      --border: rgba(148, 163, 184, 0.16);
+      --border-focus: rgba(56, 189, 248, 0.5);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --mono: 'JetBrains Mono', Consolas, monospace;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.97);
+      border-bottom: 1px solid var(--border);
+      z-index: 20;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+    .viewport {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #111827 0%, #030712 100%);
+      overflow: hidden;
+      padding: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 92vw;
+      max-height: 86vh;
+    }
+    #glCanvas {
+      display: block;
+      max-width: 100%;
+      max-height: 86vh;
+      object-fit: contain;
+    }
+    #overlayCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .split-slider-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #ffffff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 6px rgba(56, 189, 248, 0.6);
+      cursor: ew-resize;
+      z-index: 10;
+      touch-action: none;
+    }
+    .split-slider-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 34px;
+      height: 34px;
+      background: #ffffff;
+      border: 2px solid #0f172a;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .sidebar {
+      width: 460px;
+      background: var(--panel);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--border);
+      padding: 16px;
+      overflow-y: auto;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .section {
+      background: var(--panel-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .btn {
+      padding: 7px 10px;
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .btn:hover {
+      background: rgba(51, 65, 85, 0.9);
+      border-color: var(--accent);
+    }
+    .btn.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .control-row {
+      margin-bottom: 9px;
+    }
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      font-family: var(--mono);
+      margin-bottom: 4px;
+      color: #cbd5e1;
+    }
+    .control-label span:last-child {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 5px;
+      border-radius: 3px;
+      background: #334155;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11.5px;
+      margin-bottom: 7px;
+      color: #cbd5e1;
+    }
+    .toggle-row input[type="checkbox"] {
+      cursor: pointer;
+      accent-color: var(--accent);
+      width: 15px;
+      height: 15px;
+    }
+    .hud-overlay {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      background: rgba(2, 6, 23, 0.88);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.6;
+      pointer-events: none;
+      z-index: 15;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    #curveCanvas {
+      width: 100%;
+      height: 85px;
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+    .code-box {
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 6px;
+      padding: 9px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: #38bdf8;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      position: relative;
+      overflow-x: auto;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-family: var(--mono);
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover {
+      color: #fff;
+      background: var(--accent);
+      color: #0f172a;
+    }
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 480px;
+      background: rgba(16, 185, 129, 0.95);
+      color: #022c22;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+      z-index: 50;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (max-width: 1024px) {
+      .main-workspace {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: 48vh;
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+      #toast {
+        right: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="badge">GPU OPTICS</span>
+      <h1>魚眼與相機鏡頭光學畸變綜合實驗室</h1>
+    </div>
+    <div style="font-size:12px; font-family:var(--mono); color:var(--text-dim);">
+      幾何模型：<span id="currentModelLabel" style="color:var(--accent);">Brown-Conrady 經典多項式 (針孔)</span>
+    </div>
+  </header>
+
+  <div class="main-workspace">
+    <div class="viewport">
+      <div class="hud-overlay" id="hud">
+        FOV 對角線視場角: <span id="hudFov" style="color:var(--accent);">65.0°</span><br>
+        等效焦距 f: <span id="hudFocal" style="color:#10b981;">-- px</span><br>
+        映射模式: <span id="hudMode" style="color:#38bdf8;">正向光學畸變 (Forward Distort)</span>
+      </div>
+
+      <div class="canvas-container" id="container">
+        <canvas id="glCanvas" width="900" height="900"></canvas>
+        <canvas id="overlayCanvas" width="900" height="900"></canvas>
+        
+        <div class="split-slider-line" id="splitLine" style="left: 100%;">
+          <div class="split-slider-handle">⇄</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <!-- 1. 測試目標影像 -->
+      <div class="section">
+        <div class="section-title">測試目標影像</div>
+        <div class="btn-group" style="grid-template-columns: 1fr 1fr 1fr;">
+          <button class="btn active" id="btnPatCity" onclick="setPattern('city')">都會街景</button>
+          <button class="btn" id="btnPatGrid" onclick="setPattern('grid')">標定棋盤格</button>
+          <button class="btn" id="btnPatRoom" onclick="setPattern('room')">室內透視</button>
+        </div>
+        <div style="margin-top: 6px;">
+          <button class="btn" style="width: 100%;" onclick="document.getElementById('fileIn').click()">上傳自訂測試照片</button>
+          <input type="file" id="fileIn" accept="image/*" style="display:none;" onchange="handleUpload(event)">
+        </div>
+      </div>
+
+      <!-- 2. 相機核心幾何模型 -->
+      <div class="section">
+        <div class="section-title">相機幾何模型</div>
+        <div class="btn-group">
+          <button class="btn active" id="btnModelBrown" onclick="switchCameraModel(0)">Brown-Conrady<br><span style="font-size:10px; opacity:0.8;">針孔多項式模型</span></button>
+          <button class="btn" id="btnModelFisheye" onclick="switchCameraModel(1)">F-Theta 魚眼<br><span style="font-size:10px; opacity:0.8;">廣角投影體系</span></button>
+        </div>
+      </div>
+
+      <!-- 3. 光學映射方向 -->
+      <div class="section">
+        <div class="section-title">光學映射方向</div>
+        <div class="btn-group">
+          <button class="btn active" id="btnModeDistort" onclick="setMode(0)">正向光學畸變</button>
+          <button class="btn" id="btnModeUndistort" onclick="setMode(1)">逆向去畸變校正</button>
+        </div>
+      </div>
+
+      <!-- 4. F-Theta 子模型投影公式 -->
+      <div class="section" id="fthetaSection" style="display:none;">
+        <div class="section-title">F-Theta 投影公式</div>
+        <div class="btn-group" style="grid-template-columns: 1fr 1fr;">
+          <button class="btn active" id="btnProj0" onclick="setProjection(0)">等距投影<br><span style="font-size:10px; opacity:0.8;">r = f · θ</span></button>
+          <button class="btn" id="btnProj1" onclick="setProjection(1)">等立體角<br><span style="font-size:10px; opacity:0.8;">r = 2f · sin(θ/2)</span></button>
+          <button class="btn" id="btnProj2" onclick="setProjection(2)">正射投影<br><span style="font-size:10px; opacity:0.8;">r = f · sin(θ)</span></button>
+          <button class="btn" id="btnProj3" onclick="setProjection(3)">球極立體<br><span style="font-size:10px; opacity:0.8;">r = 2f · tan(θ/2)</span></button>
+          <button class="btn" id="btnProj4" onclick="setProjection(4)" style="grid-column: span 2;">透視針孔<br><span style="font-size:10px; opacity:0.8;">r = f · tan(θ)</span></button>
+        </div>
+        <canvas id="curveCanvas" width="400" height="85"></canvas>
+      </div>
+
+      <!-- 5. 參數控制項 -->
+      <div class="section">
+        <div class="section-title">
+          <span>光學與幾何參數</span>
+          <button class="btn" style="padding: 2px 8px; font-size: 11px;" onclick="resetParams()">重設</button>
+        </div>
+
+        <div class="control-row">
+          <div class="control-label">
+            <span>視場角 (FOV 對角線)</span>
+            <span id="val_fov">65.0°</span>
+          </div>
+          <input type="range" id="fov" min="30" max="220" step="1" value="65" oninput="updateParam('fov', this.value)" />
+        </div>
+
+        <!-- Brown-Conrady 專屬參數區 -->
+        <div id="brownControls">
+          <div class="control-row">
+            <div class="control-label">
+              <span>徑向畸變 k1 (桶/枕狀)</span>
+              <span id="val_k1">0.00</span>
+            </div>
+            <input type="range" id="k1" min="-1.5" max="1.5" step="0.01" value="0.0" oninput="updateParam('k1', this.value)" />
+          </div>
+          <div class="control-row">
+            <div class="control-label">
+              <span>高階徑向畸變 k2</span>
+              <span id="val_k2">0.00</span>
+            </div>
+            <input type="range" id="k2" min="-1.0" max="1.0" step="0.01" value="0.0" oninput="updateParam('k2', this.value)" />
+          </div>
+          <div class="control-row">
+            <div class="control-label">
+              <span>切向畸變 p1</span>
+              <span id="val_p1">0.00</span>
+            </div>
+            <input type="range" id="p1" min="-0.08" max="0.08" step="0.001" value="0.0" oninput="updateParam('p1', this.value)" />
+          </div>
+          <div class="control-row">
+            <div class="control-label">
+              <span>切向畸變 p2</span>
+              <span id="val_p2">0.00</span>
+            </div>
+            <input type="range" id="p2" min="-0.08" max="0.08" step="0.001" value="0.0" oninput="updateParam('p2', this.value)" />
+          </div>
+        </div>
+
+        <!-- F-Theta 專屬參數區 -->
+        <div id="fisheyeControls" style="display:none;">
+          <div class="control-row">
+            <div class="control-label">
+              <span>Kannala-Brandt θ³ 係數 k1</span>
+              <span id="val_fk1">0.00</span>
+            </div>
+            <input type="range" id="fk1" min="-0.6" max="0.6" step="0.01" value="0.0" oninput="updateParam('fk1', this.value)" />
+          </div>
+          <div class="control-row">
+            <div class="control-label">
+              <span>Kannala-Brandt θ⁵ 係數 k2</span>
+              <span id="val_fk2">0.00</span>
+            </div>
+            <input type="range" id="fk2" min="-0.3" max="0.3" step="0.01" value="0.0" oninput="updateParam('fk2', this.value)" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. 經典預設情境 -->
+      <div class="section">
+        <div class="section-title">經典情境預設</div>
+        <div class="btn-group" style="grid-template-columns: 1fr 1fr;">
+          <button class="btn" onclick="applyPreset('pinhole')" style="grid-column: span 2; border-color: #38bdf8;">理想針孔無失真</button>
+          <button class="btn" onclick="applyPreset('barrel')">經典桶狀 (廣角鏡)</button>
+          <button class="btn" onclick="applyPreset('pincushion')">枕狀畸變 (望遠鏡)</button>
+          <button class="btn" onclick="applyPreset('actioncam')">運動相機 (GoPro 視角)</button>
+          <button class="btn" onclick="applyPreset('fisheye180')">超廣角 180° 圓形魚眼</button>
+        </div>
+      </div>
+
+      <!-- 7. 輔助可視化與動態循環 -->
+      <div class="section">
+        <div class="section-title">輔助可視化</div>
+        <div class="toggle-row">
+          <span>顯示光流位移網格</span>
+          <input type="checkbox" id="chkGrid" onchange="drawOverlay()" />
+        </div>
+        <div class="toggle-row">
+          <span>自然暗角漸暈 (cos⁴θ)</span>
+          <input type="checkbox" id="chkVignette" onchange="updateToggles()" />
+        </div>
+        <div class="toggle-row">
+          <span>圓形魚眼鏡頭遮罩</span>
+          <input type="checkbox" id="chkMask" onchange="updateToggles()" />
+        </div>
+        <div class="btn-group" style="grid-template-columns: 1fr 1fr; margin-top: 6px;">
+          <button class="btn" id="btnAnim" onclick="toggleAnimation()">▶ 播放 FOV 動態變化</button>
+          <button class="btn" onclick="toggleSplitView()">切換 左右對比</button>
+        </div>
+      </div>
+
+      <!-- 8. OpenCV 參數匯出 -->
+      <div class="section">
+        <div class="section-title">OpenCV 標定參數矩陣</div>
+        <div class="code-box">
+          <button class="copy-btn" onclick="copyOpenCV()">複製代碼</button>
+          <span id="opencvBox"># 載入中...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">已複製 OpenCV 標定參數！</div>
+
+  <script>
+    const vsSource = `
+      attribute vec2 a_pos;
+      varying vec2 v_uv;
+      void main() {
+        v_uv = (a_pos + 1.0) * 0.5;
+        gl_Position = vec4(a_pos, 0.0, 1.0);
+      }
+    `;
+
+    const fsSource = `
+      precision highp float;
+      varying vec2 v_uv;
+      uniform sampler2D u_image;
+      uniform int u_model;      // 0: Brown-Conrady, 1: F-Theta
+      uniform int u_mode;       // 0: Distort, 1: Undistort
+      uniform int u_proj;       // 0: Equidistant, 1: Equisolid, 2: Orthographic, 3: Stereographic, 4: Perspective
+      uniform float u_fovRad;
+      uniform float u_focal;
+      uniform float u_k1, u_k2, u_p1, u_p2;
+      uniform float u_fk1, u_fk2;
+      uniform int u_vignette;
+      uniform int u_mask;
+      uniform float u_splitX;
+
+      const float PI = 3.141592653589793;
+
+      void main() {
+        // 左右對比滑桿判斷：小於分割線時渲染原始無失真影像
+        if (v_uv.x < u_splitX && u_splitX < 0.999) {
+          gl_FragColor = texture2D(u_image, v_uv);
+          return;
+        }
+
+        vec2 p = (v_uv - 0.5) * 2.0; 
+        float r_d = length(p);
+
+        if (u_model == 0) {
+          // ==================== Brown-Conrady 經典多項式 (針孔體系) ====================
+          vec2 xy = p * tan(u_fovRad * 0.5);
+          vec2 mapped_xy = xy;
+
+          if (u_mode == 0) {
+            // 正向光學畸變 (Forward Distort)
+            float r2 = dot(xy, xy);
+            float r4 = r2 * r2;
+            float radial = 1.0 + u_k1 * r2 + u_k2 * r4;
+            vec2 tanD = vec2(
+              2.0 * u_p1 * xy.x * xy.y + u_p2 * (r2 + 2.0 * xy.x * xy.x),
+              u_p1 * (r2 + 2.0 * xy.y * xy.y) + 2.0 * u_p2 * xy.x * xy.y
+            );
+            mapped_xy = xy * radial + tanD;
+          } else {
+            // 逆向去畸變校正 (Undistort / 逆向定點迭代法求解無失真座標)
+            vec2 curr = xy;
+            for (int i = 0; i < 5; i++) {
+              float r2_i = dot(curr, curr);
+              float r4_i = r2_i * r2_i;
+              float rad = 1.0 + u_k1 * r2_i + u_k2 * r4_i;
+              vec2 tanD = vec2(
+                2.0 * u_p1 * curr.x * curr.y + u_p2 * (r2_i + 2.0 * curr.x * curr.x),
+                u_p1 * (r2_i + 2.0 * curr.y * curr.y) + 2.0 * u_p2 * curr.x * curr.y
+              );
+              curr = (xy - tanD) / max(rad, 0.0001);
+            }
+            mapped_xy = curr;
+          }
+
+          vec2 src_uv = (mapped_xy / tan(u_fovRad * 0.5)) * 0.5 + 0.5;
+          if (src_uv.x < 0.0 || src_uv.x > 1.0 || src_uv.y < 0.0 || src_uv.y > 1.0) {
+            gl_FragColor = vec4(0.02, 0.04, 0.08, 1.0);
+          } else {
+            vec4 col = texture2D(u_image, src_uv);
+            if (u_vignette == 1) {
+              float cosTh = cos(atan(length(xy)));
+              col.rgb *= clamp(pow(cosTh, 3.0), 0.15, 1.0);
+            }
+            gl_FragColor = col;
+          }
+
+        } else {
+          // ==================== F-Theta 魚眼投影體系 ====================
+          if (u_mask == 1 && r_d > 1.0) {
+            gl_FragColor = vec4(0.02, 0.04, 0.08, 1.0);
+            return;
+          }
+
+          float theta = 0.0;
+          float r_scaled = r_d / max(u_focal, 0.0001);
+
+          if (u_proj == 0) {
+            theta = r_scaled;
+          } else if (u_proj == 1) {
+            theta = 2.0 * asin(clamp(r_scaled * 0.5, -0.9999, 0.9999));
+          } else if (u_proj == 2) {
+            theta = asin(clamp(r_scaled, -0.9999, 0.9999));
+          } else if (u_proj == 3) {
+            theta = 2.0 * atan(r_scaled * 0.5);
+          } else {
+            theta = atan(r_scaled);
+          }
+
+          // Kannala-Brandt 偶數次乘冪展開 (theta 自身乘上 1 + k1*th^2 + k2*th^4)
+          float th2 = theta * theta;
+          theta = theta * (1.0 + u_fk1 * th2 + u_fk2 * th2 * th2);
+
+          if (theta > u_fovRad || theta < 0.0) {
+            gl_FragColor = vec4(0.02, 0.04, 0.08, 1.0);
+            return;
+          }
+
+          float tanTheta = tan(theta);
+          vec2 dir = (r_d > 0.0001) ? (p / r_d) : vec2(0.0);
+          vec2 src_p = dir * tanTheta / tan(u_fovRad * 0.7);
+          vec2 src_uv = src_p * 0.5 + 0.5;
+
+          if (src_uv.x < 0.0 || src_uv.x > 1.0 || src_uv.y < 0.0 || src_uv.y > 1.0) {
+            gl_FragColor = vec4(0.02, 0.04, 0.08, 1.0);
+          } else {
+            vec4 col = texture2D(u_image, src_uv);
+            if (u_vignette == 1) {
+              float vig = pow(clamp(cos(theta), 0.0, 1.0), 3.0);
+              col.rgb *= (0.25 + 0.75 * vig);
+            }
+            gl_FragColor = col;
+          }
+        }
+      }
+    `;
+
+    const state = {
+      model: 0,      // 0: Brown-Conrady, 1: F-Theta
+      mode: 0,       // 0: Distort, 1: Undistort
+      proj: 0,       // 0~4
+      fov: 65.0,
+      k1: 0.0,
+      k2: 0.0,
+      p1: 0.0,
+      p2: 0.0,
+      fk1: 0.0,
+      fk2: 0.0,
+      vignette: 0,
+      mask: 0,
+      splitX: 1.0,
+      animating: false,
+      pattern: 'city'
+    };
+
+    let gl, program, texture;
+    let uniforms = {};
+
+    function initGL() {
+      const canvas = document.getElementById('glCanvas');
+      gl = canvas.getContext('webgl');
+      if (!gl) {
+        showToast("您的瀏覽器不支援 WebGL，請更換現代瀏覽器！");
+        return;
+      }
+
+      function compile(src, type) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+          console.error(gl.getShaderInfoLog(s));
+        }
+        return s;
+      }
+      program = gl.createProgram();
+      gl.attachShader(program, compile(vsSource, gl.VERTEX_SHADER));
+      gl.attachShader(program, compile(fsSource, gl.FRAGMENT_SHADER));
+      gl.linkProgram(program);
+      gl.useProgram(program);
+
+      const verts = new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]);
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+
+      const pos = gl.getAttribLocation(program, "a_pos");
+      gl.enableVertexAttribArray(pos);
+      gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+      [
+        'u_image', 'u_model', 'u_mode', 'u_proj', 'u_fovRad', 'u_focal',
+        'u_k1', 'u_k2', 'u_p1', 'u_p2', 'u_fk1', 'u_fk2',
+        'u_vignette', 'u_mask', 'u_splitX'
+      ].forEach(name => {
+        uniforms[name] = gl.getUniformLocation(program, name);
+      });
+
+      texture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+      setupSplitSlider();
+      generatePattern('city');
+      render();
+      drawCurves();
+    }
+
+    function computeFocal(proj, maxTheta) {
+      if (proj === 0) return 1.0 / maxTheta;
+      if (proj === 1) return 1.0 / (2.0 * Math.sin(maxTheta * 0.5));
+      if (proj === 2) return 1.0 / Math.sin(maxTheta);
+      if (proj === 3) return 1.0 / (2.0 * Math.tan(maxTheta * 0.5));
+      return 1.0 / Math.tan(maxTheta);
+    }
+
+    function render() {
+      if (!gl) return;
+      const fovRad = (state.fov * Math.PI) / 360.0;
+      const focal = computeFocal(state.proj, fovRad);
+
+      gl.uniform1i(uniforms.u_model, state.model);
+      gl.uniform1i(uniforms.u_mode, state.mode);
+      gl.uniform1i(uniforms.u_proj, state.proj);
+      gl.uniform1f(uniforms.u_fovRad, fovRad);
+      gl.uniform1f(uniforms.u_focal, focal);
+      gl.uniform1f(uniforms.u_k1, state.k1);
+      gl.uniform1f(uniforms.u_k2, state.k2);
+      gl.uniform1f(uniforms.u_p1, state.p1);
+      gl.uniform1f(uniforms.u_p2, state.p2);
+      gl.uniform1f(uniforms.u_fk1, state.fk1);
+      gl.uniform1f(uniforms.u_fk2, state.fk2);
+      gl.uniform1i(uniforms.u_vignette, state.vignette);
+      gl.uniform1i(uniforms.u_mask, state.mask);
+      gl.uniform1f(uniforms.u_splitX, state.splitX);
+
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      document.getElementById('hudFov').innerText = state.fov.toFixed(1) + '°';
+      document.getElementById('hudFocal').innerText = (focal * 450).toFixed(1) + ' px';
+
+      drawOverlay();
+      updateOpenCV();
+    }
+
+    function switchCameraModel(m) {
+      state.model = m;
+      document.getElementById('btnModelBrown').classList.toggle('active', m === 0);
+      document.getElementById('btnModelFisheye').classList.toggle('active', m === 1);
+      document.getElementById('brownControls').style.display = (m === 0) ? 'block' : 'none';
+      document.getElementById('fisheyeControls').style.display = (m === 1) ? 'block' : 'none';
+      document.getElementById('fthetaSection').style.display = (m === 1) ? 'block' : 'none';
+      document.getElementById('currentModelLabel').innerText = (m === 0) ? 'Brown-Conrady 經典多項式 (針孔)' : 'F-Theta 魚眼投影體系';
+      render();
+    }
+
+    function setMode(m) {
+      state.mode = m;
+      document.getElementById('btnModeDistort').classList.toggle('active', m === 0);
+      document.getElementById('btnModeUndistort').classList.toggle('active', m === 1);
+      document.getElementById('hudMode').innerText = (m === 0) ? '正向光學畸變 (Forward Distort)' : '逆向去畸變校正 (Undistort)';
+      render();
+    }
+
+    function setProjection(p) {
+      state.proj = p;
+      for (let i = 0; i < 5; i++) {
+        const btn = document.getElementById('btnProj' + i);
+        if (btn) btn.classList.toggle('active', i === p);
+      }
+      render();
+      drawCurves();
+    }
+
+    function setPattern(p) {
+      state.pattern = p;
+      document.getElementById('btnPatCity').classList.toggle('active', p === 'city');
+      document.getElementById('btnPatGrid').classList.toggle('active', p === 'grid');
+      document.getElementById('btnPatRoom').classList.toggle('active', p === 'room');
+      generatePattern(p);
+    }
+
+    function updateParam(k, v) {
+      state[k] = parseFloat(v);
+      const label = document.getElementById('val_' + k);
+      if (label) label.innerText = (k === 'fov') ? (state[k].toFixed(1) + '°') : state[k].toFixed(2);
+      render();
+    }
+
+    function resetParams() {
+      state.fov = (state.model === 0) ? 65.0 : 150.0;
+      state.k1 = 0; state.k2 = 0; state.p1 = 0; state.p2 = 0;
+      state.fk1 = 0; state.fk2 = 0;
+      syncAllUI();
+      render();
+    }
+
+    function applyPreset(p) {
+      if (p === 'pinhole') {
+        switchCameraModel(0);
+        state.fov = 65.0;
+        state.k1 = 0.0; state.k2 = 0.0; state.p1 = 0.0; state.p2 = 0.0;
+        state.fk1 = 0.0; state.fk2 = 0.0;
+        state.vignette = 0; state.mask = 0;
+      } else if (p === 'barrel') {
+        switchCameraModel(0);
+        state.fov = 85.0;
+        state.k1 = -0.42; state.k2 = 0.15; state.p1 = 0.0; state.p2 = 0.0;
+        state.vignette = 0; state.mask = 0;
+      } else if (p === 'pincushion') {
+        switchCameraModel(0);
+        state.fov = 50.0;
+        state.k1 = 0.35; state.k2 = -0.05; state.p1 = 0.0; state.p2 = 0.0;
+        state.vignette = 0; state.mask = 0;
+      } else if (p === 'actioncam') {
+        switchCameraModel(1);
+        setProjection(0); // 等距
+        state.fov = 140.0;
+        state.fk1 = 0.15; state.fk2 = 0.02;
+        state.vignette = 1; state.mask = 0;
+      } else if (p === 'fisheye180') {
+        switchCameraModel(1);
+        setProjection(1); // 等立體角
+        state.fov = 190.0;
+        state.fk1 = 0.45; state.fk2 = 0.12;
+        state.vignette = 1; state.mask = 1;
+      }
+      syncAllUI();
+      render();
+    }
+
+    function syncAllUI() {
+      ['fov', 'k1', 'k2', 'p1', 'p2', 'fk1', 'fk2'].forEach(k => {
+        const input = document.getElementById(k);
+        const label = document.getElementById('val_' + k);
+        if (input) input.value = state[k];
+        if (label) label.innerText = (k === 'fov') ? (state[k].toFixed(1) + '°') : state[k].toFixed(2);
+      });
+      document.getElementById('chkVignette').checked = (state.vignette === 1);
+      document.getElementById('chkMask').checked = (state.mask === 1);
+    }
+
+    function updateToggles() {
+      state.vignette = document.getElementById('chkVignette').checked ? 1 : 0;
+      state.mask = document.getElementById('chkMask').checked ? 1 : 0;
+      render();
+    }
+
+    function updateOpenCV() {
+      const box = document.getElementById('opencvBox');
+      if (state.model === 0) {
+        box.innerText =
+`# Python cv2.calibrateCamera (Brown-Conrady 針孔)
+import numpy as np
+
+K = np.array([
+    [750.0,   0.0, 450.0],
+    [  0.0, 750.0, 450.0],
+    [  0.0,   0.0,   1.0]
+])
+
+# D = [k1, k2, p1, p2, k3]
+D = np.array([${state.k1.toFixed(4)}, ${state.k2.toFixed(4)}, ${state.p1.toFixed(4)}, ${state.p2.toFixed(4)}, 0.0])`;
+      } else {
+        box.innerText =
+`# Python cv2.fisheye (Kannala-Brandt F-Theta 魚眼)
+import numpy as np
+
+K = np.array([
+    [450.0,   0.0, 450.0],
+    [  0.0, 450.0, 450.0],
+    [  0.0,   0.0,   1.0]
+])
+
+# D = [k1, k2, k3, k4]
+D = np.array([${state.fk1.toFixed(4)}, ${state.fk2.toFixed(4)}, 0.0, 0.0])`;
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function copyOpenCV() {
+      const code = document.getElementById('opencvBox').innerText;
+      const ta = document.createElement('textarea');
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast("已成功複製 OpenCV 矩陣代碼！");
+      } catch (err) {
+        showToast("複製失敗，請手動選取代碼。");
+      }
+      document.body.removeChild(ta);
+    }
+
+    function drawOverlay() {
+      const cvs = document.getElementById('overlayCanvas');
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      if (!document.getElementById('chkGrid').checked) return;
+
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+      ctx.lineWidth = 1.5;
+
+      const rings = 8;
+      const rad = cvs.width * 0.48;
+      for (let i = 1; i <= rings; i++) {
+        ctx.beginPath();
+        ctx.arc(cvs.width / 2, cvs.height / 2, (rad / rings) * i, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+        ctx.beginPath();
+        ctx.moveTo(cvs.width / 2, cvs.height / 2);
+        ctx.lineTo(cvs.width / 2 + Math.cos(a) * rad, cvs.height / 2 + Math.sin(a) * rad);
+        ctx.stroke();
+      }
+    }
+
+    function drawCurves() {
+      const c = document.getElementById('curveCanvas');
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, c.width, c.height);
+
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(10, 5, c.width - 20, c.height - 15);
+
+      const f = 40;
+      const maxTh = Math.PI * 0.5;
+      const colors = ['#38bdf8', '#10b981', '#fbbf24', '#a855f7', '#ef4444'];
+      for (let p = 0; p < 5; p++) {
+        ctx.strokeStyle = (p === state.proj) ? colors[p] : '#475569';
+        ctx.lineWidth = (p === state.proj) ? 2.5 : 1;
+        ctx.beginPath();
+        for (let x = 0; x < c.width - 20; x += 4) {
+          const th = (x / (c.width - 20)) * maxTh;
+          let r = 0;
+          if (p === 0) r = f * th;
+          else if (p === 1) r = 2 * f * Math.sin(th / 2);
+          else if (p === 2) r = f * Math.sin(th);
+          else if (p === 3) r = 2 * f * Math.tan(th / 2);
+          else r = f * Math.tan(th);
+
+          const y = (c.height - 10) - r * 0.7;
+          if (x === 0) ctx.moveTo(10 + x, y);
+          else ctx.lineTo(10 + x, y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    function setupSplitSlider() {
+      const line = document.getElementById('splitLine');
+      const container = document.getElementById('container');
+      let isDragging = false;
+
+      function updateSplit(clientX) {
+        const rect = container.getBoundingClientRect();
+        let x = (clientX - rect.left) / rect.width;
+        x = Math.max(0.0, Math.min(1.0, x));
+        state.splitX = x;
+        line.style.left = (x * 100) + '%';
+        render();
+      }
+
+      line.addEventListener('mousedown', () => isDragging = true);
+      window.addEventListener('mouseup', () => isDragging = false);
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        updateSplit(e.clientX);
+      });
+
+      line.addEventListener('touchstart', (e) => {
+        isDragging = true;
+      }, { passive: true });
+      window.addEventListener('touchend', () => isDragging = false);
+      window.addEventListener('touchmove', (e) => {
+        if (!isDragging || !e.touches[0]) return;
+        updateSplit(e.touches[0].clientX);
+      }, { passive: true });
+    }
+
+    function toggleSplitView() {
+      const line = document.getElementById('splitLine');
+      if (state.splitX > 0.99) {
+        state.splitX = 0.5;
+        line.style.left = '50%';
+      } else {
+        state.splitX = 1.0;
+        line.style.left = '100%';
+      }
+      render();
+    }
+
+    let animId = null;
+    function toggleAnimation() {
+      state.animating = !state.animating;
+      document.getElementById('btnAnim').innerText = state.animating ? "⏸ 暫停動態循環" : "▶ 播放 FOV 動態變化";
+      if (state.animating) {
+        let t = 0;
+        function loop() {
+          if (!state.animating) return;
+          t += 0.02;
+          const fov = 120 + Math.sin(t) * 70;
+          state.fov = fov;
+          document.getElementById('fov').value = fov;
+          document.getElementById('val_fov').innerText = fov.toFixed(1) + '°';
+          render();
+          animId = requestAnimationFrame(loop);
+        }
+        loop();
+      } else {
+        cancelAnimationFrame(animId);
+      }
+    }
+
+    function generatePattern(type) {
+      const cvs = document.createElement('canvas');
+      cvs.width = 1024; cvs.height = 1024;
+      const ctx = cvs.getContext('2d');
+
+      if (type === 'city') {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, 1024, 1024);
+        const grad = ctx.createLinearGradient(0, 0, 0, 650);
+        grad.addColorStop(0, '#1e293b');
+        grad.addColorStop(1, '#0284c7');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 1024, 650);
+
+        for (let i = 0; i < 14; i++) {
+          const w = 60 + (i % 4) * 20;
+          const h = 280 + (i % 6) * 55;
+          const x = i * 75 - 20;
+          const y = 650 - h;
+          ctx.fillStyle = (i % 2 === 0) ? '#0f172a' : '#1e293b';
+          ctx.fillRect(x, y, w, h);
+          ctx.fillStyle = '#fef08a';
+          for (let r = y + 20; r < y + h - 15; r += 20) {
+            for (let c = x + 10; c < x + w - 10; c += 15) {
+              if (Math.sin(r * 11 + c * 7) > -0.1) ctx.fillRect(c, r, 8, 10);
+            }
+          }
+        }
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        for (let x = -500; x <= 1524; x += 60) {
+          ctx.beginPath();
+          ctx.moveTo(x, 1024);
+          ctx.lineTo(512 + (x - 512) * 0.15, 650);
+          ctx.stroke();
+        }
+      } else if (type === 'grid') {
+        const num = 16;
+        const sz = 1024 / num;
+        for (let y = 0; y < num; y++) {
+          for (let x = 0; x < num; x++) {
+            ctx.fillStyle = (x + y) % 2 === 0 ? '#f8fafc' : '#1e293b';
+            ctx.fillRect(x * sz, y * sz, sz, sz);
+          }
+        }
+      } else {
+        ctx.fillStyle = '#1e1e24';
+        ctx.fillRect(0, 0, 1024, 1024);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(256, 256, 512, 512);
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.lineTo(256, 256);
+        ctx.moveTo(1024, 0); ctx.lineTo(768, 256);
+        ctx.moveTo(0, 1024); ctx.lineTo(256, 768);
+        ctx.moveTo(1024, 1024); ctx.lineTo(768, 768);
+        ctx.stroke();
+      }
+
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cvs);
+      render();
+    }
+
+    function handleUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          gl.bindTexture(gl.TEXTURE_2D, texture);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+          render();
+          showToast("已載入自訂測試照片");
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    window.onload = initGL;
+  </script>
+</body>
+</html>
