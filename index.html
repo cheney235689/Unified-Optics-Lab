@@ -534,7 +534,8 @@
       attribute vec2 a_pos;
       varying vec2 v_uv;
       void main() {
-        v_uv = (a_pos + 1.0) * 0.5;
+        vec2 uv = (a_pos + 1.0) * 0.5;
+        v_uv = vec2(uv.x, 1.0 - uv.y);
         gl_Position = vec4(a_pos, 0.0, 1.0);
       }
     `;
@@ -607,6 +608,9 @@
             theta = atan(r_norm);
           }
 
+          // Clamp theta to avoid tan() singularity beyond hemisphere
+          theta = min(theta, PI * 0.498);
+
           // Apply Kannala-Brandt higher-order polynomial residual expansion
           float th2 = theta * theta;
           theta = theta * (1.0 + u_fk1 * th2 + u_fk2 * th2 * th2);
@@ -617,7 +621,8 @@
           }
 
           // Project ray onto virtual rectilinear pinhole image plane
-          float tanTheta = tan(theta);
+          float clampedTheta = min(theta, PI * 0.498);
+          float tanTheta = tan(clampedTheta);
           vec2 dir = (r_d > 0.00001) ? (p / r_d) : vec2(0.0);
 
           if (!u_isUndistort) {
@@ -653,17 +658,23 @@
             vec2 mapped = p_bc * radial + tang;
             sample_uv = mapped * 0.5 + u_center;
           } else {
-            // Undistortion iterative inversion (Newton-Raphson 5 iterations)
+            // Undistortion via fixed-point iteration (5 iterations with divergence clamping)
             vec2 cur = p_bc;
             for (int i = 0; i < 5; i++) {
               float cr2 = dot(cur, cur);
+              // Clamp r² to prevent divergence at extreme distortion
+              cr2 = min(cr2, 4.0);
               float cr4 = cr2 * cr2;
               float cr6 = cr4 * cr2;
               float radial = 1.0 + u_bk1 * cr2 + u_bk2 * cr4 + u_bk3 * cr6;
+              // Clamp radial to positive range to prevent sign flip
+              radial = max(radial, 0.1);
               vec2 tang;
               tang.x = 2.0 * u_bp1 * cur.x * cur.y + u_bp2 * (cr2 + 2.0 * cur.x * cur.x);
               tang.y = u_bp1 * (cr2 + 2.0 * cur.y * cur.y) + 2.0 * u_bp2 * cur.x * cur.y;
-              cur = (p_bc - tang) / max(radial, 0.0001);
+              cur = (p_bc - tang) / radial;
+              // Clamp output to prevent runaway coordinates
+              cur = clamp(cur, vec2(-2.0), vec2(2.0));
             }
             sample_uv = cur * 0.5 + u_center;
           }
@@ -731,6 +742,7 @@
 
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -738,11 +750,13 @@
 
     // Analytical focal length f solver for specific f-theta model
     function computeNormalizedFocal(proj, maxThetaRad) {
+      // Clamp to just under PI/2 to prevent tan() singularity for Perspective/Stereographic
+      const safeThetaRad = Math.min(maxThetaRad, Math.PI * 0.498);
       if (proj === 0) return 1.0 / maxThetaRad;                              // Equidistant: r = f * theta
       if (proj === 1) return 1.0 / (2.0 * Math.sin(maxThetaRad * 0.5));      // Equisolid: r = 2f * sin(theta/2)
-      if (proj === 2) return 1.0 / Math.sin(maxThetaRad);                    // Orthographic: r = f * sin(theta)
-      if (proj === 3) return 1.0 / (2.0 * Math.tan(maxThetaRad * 0.5));      // Stereographic: r = 2f * tan(theta/2)
-      return 1.0 / Math.tan(maxThetaRad);                                    // Perspective: r = f * tan(theta)
+      if (proj === 2) return 1.0 / Math.sin(Math.min(maxThetaRad, Math.PI * 0.498));  // Orthographic: r = f * sin(theta)
+      if (proj === 3) return 1.0 / (2.0 * Math.tan(safeThetaRad * 0.5));      // Stereographic: r = 2f * tan(theta/2)
+      return 1.0 / Math.tan(safeThetaRad);                                    // Perspective: r = f * tan(theta)
     }
 
     /* Procedural Target Scenes Generator */
@@ -850,6 +864,16 @@
     let activeImage = generatePatternImage('city');
 
     function updateTexture(source) {
+      // Dynamically adapt canvas to source aspect ratio
+      const srcW = source.width || source.videoWidth || 960;
+      const srcH = source.height || source.videoHeight || 960;
+      if (canvas.width !== srcW || canvas.height !== srcH) {
+        canvas.width = srcW;
+        canvas.height = srcH;
+        overlayCanvas.width = srcW;
+        overlayCanvas.height = srcH;
+        gl.viewport(0, 0, srcW, srcH);
+      }
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
       render();
@@ -1048,6 +1072,17 @@
       document.getElementById('sliderBp2').value = state.bp2;
       document.getElementById('valBp2').innerText = (state.bp2 >= 0 ? '+' : '') + state.bp2.toFixed(3);
 
+      // Sync projection buttons active state
+      const projButtons = document.querySelectorAll('.proj-btn');
+      projButtons.forEach(btn => {
+        const p = parseInt(btn.dataset.proj, 10);
+        if (p === state.proj) {
+          btn.className = 'proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 active-tab';
+        } else {
+          btn.className = 'proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300';
+        }
+      });
+
       // Badges
       const projNames = [
         'F-Theta: 等距投影',
@@ -1057,6 +1092,11 @@
         'F-Theta: 針孔透視'
       ];
       document.getElementById('txtModelBadge').innerText = isFtheta ? projNames[state.proj] : 'Brown-Conrady 針孔模型';
+
+      // Sync curve formula label
+      const projFormulas = ['r = f · θ', 'r = 2f · sin(θ/2)', 'r = f · sin(θ)', 'r = 2f · tan(θ/2)', 'r = f · tan(θ)'];
+      const txtCurveModel = document.getElementById('txtCurveModel');
+      if (txtCurveModel) txtCurveModel.innerText = projFormulas[state.proj];
     }
 
     function setupInteraction() {
@@ -1270,7 +1310,9 @@
         const imgH = activeImage.height || 1024;
         const fovRad = (state.fov * Math.PI) / 360.0;
         const focalNorm = computeNormalizedFocal(state.proj, fovRad);
-        const fx = (focalNorm * (imgW / 2)).toFixed(2);
+        // DFOV uses diagonal half-radius, not just width/2
+        const diagHalf = Math.sqrt(imgW * imgW + imgH * imgH) / 2.0;
+        const fx = (focalNorm * diagHalf).toFixed(2);
         const fy = fx;
         const cx = (imgW * state.cx).toFixed(1);
         const cy = (imgH * state.cy).toFixed(1);
@@ -1322,18 +1364,42 @@ D = np.array([${state.bk1.toFixed(4)}, ${state.bk2.toFixed(4)}, ${state.bp1.toFi
 
       document.getElementById('btnCopyExport').addEventListener('click', () => {
         const text = document.getElementById('codeExportBox').innerText;
-        const temp = document.createElement('textarea');
-        temp.value = text;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand('copy');
-        document.body.removeChild(temp);
-        alert('OpenCV 相機標定參數已複製至剪貼簿！');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => showCopyToast()).catch(() => fallbackCopy(text));
+        } else {
+          fallbackCopy(text);
+        }
+        function fallbackCopy(t) {
+          const temp = document.createElement('textarea');
+          temp.value = t;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          document.body.removeChild(temp);
+          showCopyToast();
+        }
+        function showCopyToast() {
+          const btn = document.getElementById('btnCopyExport');
+          const origHTML = btn.innerHTML;
+          btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 已複製！';
+          btn.classList.replace('bg-emerald-600', 'bg-green-500');
+          lucide.createIcons();
+          setTimeout(() => {
+            btn.innerHTML = origHTML;
+            btn.classList.replace('bg-green-500', 'bg-emerald-600');
+            lucide.createIcons();
+          }, 2000);
+        }
       });
 
       // Mobile Drawer Toggle
       const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
       const sidebar = document.getElementById('sidebar');
+      // On mobile (< lg), sidebar should start hidden
+      if (window.innerWidth < 1024) {
+        sidebar.classList.add('hidden');
+        sidebar.classList.remove('flex');
+      }
       let sidebarOpen = false;
       toggleSidebarBtn.addEventListener('click', () => {
         sidebarOpen = !sidebarOpen;
