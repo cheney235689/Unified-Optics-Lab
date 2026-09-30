@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -12,9 +11,7 @@
   <!-- Google Fonts: JetBrains Mono & Outfit & Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -22,7 +19,6 @@
       user-select: none;
       -webkit-user-select: none;
     }
-
     body {
       font-family: 'Outfit', 'Noto Sans TC', sans-serif;
       background-color: #050811;
@@ -30,11 +26,9 @@
       overflow-x: hidden;
       margin: 0;
     }
-
     .font-mono-code {
       font-family: 'JetBrains Mono', monospace;
     }
-
     .glass-card {
       background: rgba(13, 20, 36, 0.92);
       backdrop-filter: blur(20px);
@@ -42,31 +36,26 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.85);
     }
-
     .glass-btn {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
       transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     .glass-btn:hover {
       background: rgba(255, 255, 255, 0.12);
       border-color: rgba(56, 189, 248, 0.5);
       transform: translateY(-1px);
     }
-
     .glass-btn:active {
       transform: translateY(0);
       background: rgba(255, 255, 255, 0.04);
     }
-
     .glass-btn.active-tab {
       background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(59, 130, 246, 0.35));
       border-color: rgba(56, 189, 248, 0.8);
       color: #38bdf8;
       box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
     }
-
     /* Sliders styling */
     input[type=range] {
       -webkit-appearance: none;
@@ -77,7 +66,6 @@
       background: rgba(255, 255, 255, 0.12);
       outline: none;
     }
-
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
@@ -90,12 +78,10 @@
       box-shadow: 0 0 10px rgba(14, 165, 233, 0.8);
       transition: transform 0.12s ease;
     }
-
     input[type=range]::-webkit-slider-thumb:hover {
       transform: scale(1.25);
       background: #38bdf8;
     }
-
     /* Split comparison line */
     .split-slider-line {
       position: absolute;
@@ -108,7 +94,6 @@
       z-index: 10;
       touch-action: none;
     }
-
     .split-slider-handle {
       position: absolute;
       top: 50%;
@@ -127,34 +112,18 @@
       font-weight: bold;
       border: 2px solid #38bdf8;
     }
-
-    ::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 999px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
   </style>
 </head>
-
 <body class="w-screen h-screen flex flex-col overflow-hidden bg-slate-950 text-slate-100">
 
   <!-- Header Bar -->
   <header class="h-14 border-b border-white/10 px-4 sm:px-6 flex items-center justify-between z-20 glass-card">
     <div class="flex items-center gap-3">
-      <div
-        class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/25">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/25">
         <i data-lucide="aperture" class="w-4 h-4"></i>
       </div>
       <div>
@@ -162,8 +131,7 @@
           <h1 class="text-sm font-bold tracking-wider font-mono-code text-white uppercase">
             魚眼與鏡頭光學畸變綜合實驗室
           </h1>
-          <span
-            class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hidden md:inline-block">
+          <span class="text-[10px] font-mono-code px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hidden md:inline-block">
             BROWN-CONRADY &amp; F-THETA UNIFIED
           </span>
         </div>
@@ -172,31 +140,26 @@
 
     <!-- Quick Target Image Selectors & Actions -->
     <div class="flex items-center gap-2">
-      <div
-        class="hidden sm:flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10 text-xs font-mono-code">
+      <div class="hidden sm:flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10 text-xs font-mono-code">
         <span class="text-zinc-400 px-2 text-[11px]">場景:</span>
-        <button id="btnImgCity"
-          class="px-2.5 py-1 rounded-lg text-white bg-white/10 font-medium transition">都會街景</button>
+        <button id="btnImgCity" class="px-2.5 py-1 rounded-lg text-white bg-white/10 font-medium transition">都會街景</button>
         <button id="btnImgGrid" class="px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition">標定棋盤</button>
         <button id="btnImgDots" class="px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition">圓點陣列</button>
         <button id="btnImgRoom" class="px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition">透視長廊</button>
       </div>
 
-      <label
-        class="glass-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-cyan-300 hover:text-white flex items-center gap-1.5 cursor-pointer transition">
+      <label class="glass-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-cyan-300 hover:text-white flex items-center gap-1.5 cursor-pointer transition">
         <i data-lucide="upload" class="w-3.5 h-3.5"></i>
         <span>上傳圖片</span>
         <input type="file" id="fileUploader" accept="image/*" class="hidden">
       </label>
 
-      <button id="btnExportCalib"
-        class="glass-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-300 hover:text-white flex items-center gap-1.5 transition">
+      <button id="btnExportCalib" class="glass-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-300 hover:text-white flex items-center gap-1.5 transition">
         <i data-lucide="code" class="w-3.5 h-3.5"></i>
         <span class="hidden md:inline">匯出 OpenCV 矩陣</span>
       </button>
 
-      <button id="toggleSidebarBtn"
-        class="glass-btn w-8 h-8 rounded-xl flex lg:hidden items-center justify-center text-cyan-400">
+      <button id="toggleSidebarBtn" class="glass-btn w-8 h-8 rounded-xl flex lg:hidden items-center justify-center text-cyan-400">
         <i data-lucide="sliders" class="w-4 h-4"></i>
       </button>
     </div>
@@ -206,16 +169,14 @@
   <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
 
     <!-- Viewport Display Container -->
-    <section
-      class="flex-1 relative flex items-center justify-center p-3 sm:p-5 bg-gradient-to-b from-black/95 to-slate-950 overflow-hidden">
+    <section class="flex-1 relative flex items-center justify-center p-3 sm:p-5 bg-gradient-to-b from-black/95 to-slate-950 overflow-hidden">
       <div class="relative w-full h-full max-w-4xl max-h-[82vh] flex items-center justify-center" id="canvasWrapper">
         <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10" id="container">
           <!-- WebGL GPU Shader Canvas -->
           <canvas id="glCanvas" width="960" height="960" class="block max-w-full max-h-[80vh] object-contain"></canvas>
 
           <!-- Vector Displacement & Polar Overlay -->
-          <canvas id="overlayCanvas" width="960" height="960"
-            class="absolute inset-0 pointer-events-none w-full h-full object-contain"></canvas>
+          <canvas id="overlayCanvas" width="960" height="960" class="absolute inset-0 pointer-events-none w-full h-full object-contain"></canvas>
 
           <!-- A/B Comparison Split Line -->
           <div class="split-slider-line" id="splitLine" style="left: 100%;">
@@ -233,8 +194,7 @@
             <span class="text-zinc-600">|</span>
             <span id="txtModeBadge" class="text-amber-300 font-semibold">正向畸變 (Distort)</span>
           </div>
-          <div
-            class="glass-card px-3.5 py-1.5 rounded-xl text-[11px] font-mono-code text-zinc-300 flex items-center gap-3">
+          <div class="glass-card px-3.5 py-1.5 rounded-xl text-[11px] font-mono-code text-zinc-300 flex items-center gap-3">
             <span>FOV: <strong id="hudFov" class="text-cyan-400">150.0°</strong></span>
             <span>焦距 f: <strong id="hudFocal" class="text-emerald-400">-- px</strong></span>
             <span>主點: <strong id="hudCenter" class="text-zinc-400">(0.50, 0.50)</strong></span>
@@ -242,15 +202,13 @@
         </div>
 
         <!-- Bottom Quick Switch Bar -->
-        <div
-          class="absolute bottom-4 left-1/2 -translate-x-1/2 glass-card px-4 py-2 rounded-2xl flex items-center gap-4 text-xs font-mono-code z-10 max-w-[95vw] overflow-x-auto">
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 glass-card px-4 py-2 rounded-2xl flex items-center gap-4 text-xs font-mono-code z-10 max-w-[95vw] overflow-x-auto">
           <button id="btnToggleSplit" class="text-zinc-300 hover:text-cyan-400 flex items-center gap-1.5 transition">
             <i data-lucide="columns" class="w-3.5 h-3.5"></i>
             <span id="txtSplitBtn">開啟 左右對比</span>
           </button>
           <span class="text-white/10">|</span>
-          <button id="btnAnimFov"
-            class="text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition font-semibold">
+          <button id="btnAnimFov" class="text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition font-semibold">
             <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
             <span id="txtAnimBtn">播放 FOV 循環</span>
           </button>
@@ -264,24 +222,20 @@
     </section>
 
     <!-- Sidebar Controls -->
-    <aside id="sidebar"
-      class="w-full lg:w-96 glass-card border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col h-auto lg:h-full overflow-y-auto p-5 gap-4 z-20 transition-transform duration-300">
-
+    <aside id="sidebar" class="w-full lg:w-96 glass-card border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col h-auto lg:h-full overflow-y-auto p-5 gap-4 z-20 transition-transform duration-300">
+      
       <!-- 1. 模型大類選擇 -->
       <div class="space-y-2">
-        <label
-          class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
+        <label class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
           <i data-lucide="cpu" class="w-3.5 h-3.5 text-cyan-400"></i>
           1. 核心相機模型體系
         </label>
         <div class="grid grid-cols-2 gap-2" id="familyGroup">
-          <button id="btnFamilyFtheta"
-            class="py-2 px-2.5 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 active-tab">
+          <button id="btnFamilyFtheta" class="py-2 px-2.5 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 active-tab">
             <span>F-Theta 魚眼投影</span>
             <span class="text-[9px] font-normal text-cyan-300 font-mono-code">幾何投影 + Kannala-Brandt</span>
           </button>
-          <button id="btnFamilyBrown"
-            class="py-2 px-2.5 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300">
+          <button id="btnFamilyBrown" class="py-2 px-2.5 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300">
             <span>Brown-Conrady</span>
             <span class="text-[9px] font-normal text-zinc-400 font-mono-code">經典針孔 + 徑向/切向畸變</span>
           </button>
@@ -290,13 +244,11 @@
 
       <!-- 2. 處理模式 (正向畸變 vs 逆向去畸變校正) -->
       <div class="space-y-2">
-        <label
-          class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
+        <label class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
           <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 text-indigo-400"></i>
           2. 光學映射運算方向
         </label>
-        <div
-          class="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-xl border border-white/10 text-xs font-mono-code font-semibold">
+        <div class="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-xl border border-white/10 text-xs font-mono-code font-semibold">
           <button id="btnModeDistort" class="py-1.5 rounded-lg bg-indigo-600 text-white transition">
             正向光學畸變 (Distort)
           </button>
@@ -309,36 +261,30 @@
       <!-- 3. F-Theta 專屬投影幾何子選單 -->
       <div id="panelFtheta" class="space-y-2.5">
         <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
-          <label
-            class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
+          <label class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
             <i data-lucide="orbit" class="w-3.5 h-3.5 text-cyan-400"></i>
             F-Theta 投影幾何公式
           </label>
         </div>
 
         <div class="grid grid-cols-2 gap-1.5" id="projButtonGroup">
-          <button data-proj="0"
-            class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 active-tab">
+          <button data-proj="0" class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 active-tab">
             <span>等距投影</span>
             <span class="text-[9px] font-normal text-cyan-300">r = f · θ</span>
           </button>
-          <button data-proj="1"
-            class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300">
+          <button data-proj="1" class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300">
             <span>等立體角</span>
             <span class="text-[9px] font-normal text-zinc-400">r = 2f · sin(θ/2)</span>
           </button>
-          <button data-proj="2"
-            class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300">
+          <button data-proj="2" class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300">
             <span>正射投影</span>
             <span class="text-[9px] font-normal text-zinc-400">r = f · sin(θ)</span>
           </button>
-          <button data-proj="3"
-            class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300">
+          <button data-proj="3" class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300">
             <span>球極立體</span>
             <span class="text-[9px] font-normal text-zinc-400">r = 2f · tan(θ/2)</span>
           </button>
-          <button data-proj="4"
-            class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300 col-span-2">
+          <button data-proj="4" class="proj-btn py-1.5 px-2 rounded-xl text-xs font-mono-code font-bold text-left flex flex-col gap-0.5 glass-btn text-zinc-300 col-span-2">
             <span>經典針孔透視 (Perspective)</span>
             <span class="text-[9px] font-normal text-zinc-400">r = f · tan(θ) (無失真基準)</span>
           </button>
@@ -350,8 +296,7 @@
             <span>響應特性曲線 (θ vs r)</span>
             <span class="text-cyan-400 font-bold" id="txtCurveModel">r = f · θ</span>
           </div>
-          <canvas id="curveCanvas" width="380" height="75"
-            class="w-full h-18 rounded bg-slate-950/70 border border-white/5"></canvas>
+          <canvas id="curveCanvas" width="380" height="75" class="w-full h-18 rounded bg-slate-950/70 border border-white/5"></canvas>
         </div>
 
         <!-- Kannala-Brandt Polynomial Coefficients -->
@@ -382,8 +327,7 @@
       <!-- 4. Brown-Conrady 專屬參數子選單 -->
       <div id="panelBrown" class="space-y-2.5 hidden">
         <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
-          <label
-            class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
+          <label class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
             <i data-lucide="sliders" class="w-3.5 h-3.5 text-cyan-400"></i>
             Brown-Conrady 徑向與切向多項式
           </label>
@@ -445,8 +389,7 @@
       <!-- 5. 視場角 FOV 與光學中心 (共通) -->
       <div class="space-y-2 pt-2 border-t border-white/10">
         <div class="flex items-center justify-between">
-          <label
-            class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
+          <label class="text-xs font-bold uppercase tracking-wider text-zinc-300 font-mono-code flex items-center gap-1.5">
             <i data-lucide="maximize" class="w-3.5 h-3.5 text-emerald-400"></i>
             視場角 (FOV) 與光學內參
           </label>
@@ -469,13 +412,11 @@
         <!-- Principal Point (cx, cy) -->
         <div class="grid grid-cols-2 gap-2 font-mono-code text-[11px]">
           <div class="bg-black/30 p-2 rounded-xl border border-white/5 space-y-1">
-            <div class="flex justify-between text-zinc-400"><span>光學中心 cx</span><span id="valCx"
-                class="text-cyan-300">0.50</span></div>
+            <div class="flex justify-between text-zinc-400"><span>光學中心 cx</span><span id="valCx" class="text-cyan-300">0.50</span></div>
             <input type="range" id="sliderCx" min="0.3" max="0.7" step="0.01" value="0.5">
           </div>
           <div class="bg-black/30 p-2 rounded-xl border border-white/5 space-y-1">
-            <div class="flex justify-between text-zinc-400"><span>光學中心 cy</span><span id="valCy"
-                class="text-cyan-300">0.50</span></div>
+            <div class="flex justify-between text-zinc-400"><span>光學中心 cy</span><span id="valCy" class="text-cyan-300">0.50</span></div>
             <input type="range" id="sliderCy" min="0.3" max="0.7" step="0.01" value="0.5">
           </div>
         </div>
@@ -487,19 +428,12 @@
           經典鏡頭預設參數
         </label>
         <div class="grid grid-cols-2 gap-1.5 text-xs font-mono-code">
-          <button onclick="applyPreset('ideal')"
-            class="glass-btn py-1.5 px-2 rounded-lg text-zinc-300 hover:text-white text-left">理想針孔 (無失真)</button>
-          <button onclick="applyPreset('barrel')"
-            class="glass-btn py-1.5 px-2 rounded-lg text-cyan-300 hover:text-white text-left">廣角桶狀畸變</button>
-          <button onclick="applyPreset('actioncam')"
-            class="glass-btn py-1.5 px-2 rounded-lg text-emerald-300 hover:text-white text-left">運動相機 (GoPro
-            視角)</button>
-          <button onclick="applyPreset('fisheye180')"
-            class="glass-btn py-1.5 px-2 rounded-lg text-amber-300 hover:text-white text-left">180° 環形圓形魚眼</button>
-          <button onclick="applyPreset('pincushion')"
-            class="glass-btn py-1.5 px-2 rounded-lg text-purple-300 hover:text-white text-left">望遠枕狀畸變</button>
-          <button onclick="applyPreset('decentered')"
-            class="glass-btn py-1.5 px-2 rounded-lg text-rose-300 hover:text-white text-left">鏡片偏心傾斜 (Tilt)</button>
+          <button onclick="applyPreset('ideal')" class="glass-btn py-1.5 px-2 rounded-lg text-zinc-300 hover:text-white text-left">理想針孔 (無失真)</button>
+          <button onclick="applyPreset('barrel')" class="glass-btn py-1.5 px-2 rounded-lg text-cyan-300 hover:text-white text-left">廣角桶狀畸變</button>
+          <button onclick="applyPreset('actioncam')" class="glass-btn py-1.5 px-2 rounded-lg text-emerald-300 hover:text-white text-left">運動相機 (GoPro 視角)</button>
+          <button onclick="applyPreset('fisheye180')" class="glass-btn py-1.5 px-2 rounded-lg text-amber-300 hover:text-white text-left">180° 環形圓形魚眼</button>
+          <button onclick="applyPreset('pincushion')" class="glass-btn py-1.5 px-2 rounded-lg text-purple-300 hover:text-white text-left">望遠枕狀畸變</button>
+          <button onclick="applyPreset('decentered')" class="glass-btn py-1.5 px-2 rounded-lg text-rose-300 hover:text-white text-left">鏡片偏心傾斜 (Tilt)</button>
         </div>
       </div>
 
@@ -508,27 +442,24 @@
         <label class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block mb-1">
           光學物理與輔助疊加層
         </label>
-
+        
         <div class="flex items-center justify-between bg-black/20 p-2 rounded-xl border border-white/5">
           <label class="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-white transition">
-            <input type="checkbox" id="chkPolarGrid"
-              class="rounded bg-black/40 border-white/20 text-cyan-500 focus:ring-0">
+            <input type="checkbox" id="chkPolarGrid" class="rounded bg-black/40 border-white/20 text-cyan-500 focus:ring-0">
             極坐標/位移網格 (Displacement Grid)
           </label>
         </div>
 
         <div class="flex items-center justify-between bg-black/20 p-2 rounded-xl border border-white/5">
           <label class="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-white transition">
-            <input type="checkbox" id="chkVignette" checked
-              class="rounded bg-black/40 border-white/20 text-cyan-500 focus:ring-0">
+            <input type="checkbox" id="chkVignette" checked class="rounded bg-black/40 border-white/20 text-cyan-500 focus:ring-0">
             邊緣光學漸暈 (cos⁴θ 暗角失光)
           </label>
         </div>
 
         <div class="flex items-center justify-between bg-black/20 p-2 rounded-xl border border-white/5">
           <label class="flex items-center gap-2 cursor-pointer text-zinc-300 hover:text-white transition">
-            <input type="checkbox" id="chkCircularMask" checked
-              class="rounded bg-black/40 border-white/20 text-cyan-500 focus:ring-0">
+            <input type="checkbox" id="chkCircularMask" checked class="rounded bg-black/40 border-white/20 text-cyan-500 focus:ring-0">
             圓形魚眼成像圈遮罩 (Circular Mask)
           </label>
         </div>
@@ -538,27 +469,23 @@
   </main>
 
   <!-- OpenCV Calibration Export Modal -->
-  <div id="exportModal"
-    class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-all duration-200">
+  <div id="exportModal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-all duration-200">
     <div class="glass-card max-w-lg w-full rounded-3xl p-6 border border-white/15 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
         <div class="flex items-center gap-2">
           <i data-lucide="file-code" class="w-5 h-5 text-emerald-400"></i>
           <h2 class="text-sm font-bold font-mono-code text-white">OPENCV 相機內參與畸變標定參數</h2>
         </div>
-        <button id="btnCloseModal"
-          class="w-7 h-7 rounded-full glass-btn flex items-center justify-center text-zinc-400 hover:text-white">✕</button>
+        <button id="btnCloseModal" class="w-7 h-7 rounded-full glass-btn flex items-center justify-center text-zinc-400 hover:text-white">✕</button>
       </div>
 
       <div class="space-y-2">
         <div class="text-xs text-zinc-400">隨時可貼至 Python (OpenCV / ROS / PyTorch) 專案中直接執行：</div>
-        <pre id="codeExportBox"
-          class="bg-black/90 border border-white/10 p-3.5 rounded-xl font-mono-code text-xs text-emerald-300 overflow-x-auto max-h-64 select-all"></pre>
+        <pre id="codeExportBox" class="bg-black/90 border border-white/10 p-3.5 rounded-xl font-mono-code text-xs text-emerald-300 overflow-x-auto max-h-64 select-all"></pre>
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
-        <button id="btnCopyExport"
-          class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs font-mono-code flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 transition">
+        <button id="btnCopyExport" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs font-mono-code flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 transition">
           <i data-lucide="clipboard-copy" class="w-4 h-4"></i> 複製程式碼
         </button>
       </div>
@@ -784,8 +711,8 @@
     const quadBuf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-      -1, -1, 1, -1, -1, 1,
-      -1, 1, 1, -1, 1, 1
+      -1, -1,  1, -1, -1,  1,
+      -1,  1,  1, -1,  1,  1
     ]), gl.STATIC_DRAW);
 
     const aPos = gl.getAttribLocation(program, "a_pos");
@@ -1429,5 +1356,4 @@ D = np.array([${state.bk1.toFixed(4)}, ${state.bk2.toFixed(4)}, ${state.bp1.toFi
     });
   </script>
 </body>
-
 </html>
